@@ -2,39 +2,39 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.concurrent.ExecutionException;
-
 import Exeptions.IllegalPathException;
 
 public abstract class Midia extends Worker {
-    public Midia (){
+    public Midia() {
         super.tools.add("ffmpeg");
     }
 
-    public void changeType(Archive archive) throws IllegalPathException{
+    public void changeType(Archive archive, String type) throws IllegalPathException {
 
-        String output = "";     
-
+        String newName = nameCheck(archive, type);
         try {
             ProcessBuilder command = new ProcessBuilder(
                     tools.get(1),
-                    "-FileTypeExtension",
-                    "-s4",
-                    archive.getPath());
+                    "-i",
+                    archive.getPath(),
+                    newName);
 
             command.redirectErrorStream(true);
-            Process exif = command.start();
-            Process sla = exif.onExit().get();
+            Process thread = command.start();
+            Process sla = thread.onExit().get();
 
             BufferedReader reader = new BufferedReader(
-                    new InputStreamReader(exif.getInputStream()));
+                    new InputStreamReader(thread.getInputStream()));
 
+            String output = "";
             String text;
+
             while ((text = reader.readLine()) != null) {
                 output += text + "\n";
             }
 
             if (sla.exitValue() != 0) {
-                throw new IllegalPathException("Path error: "+ output);
+                throw new IllegalPathException("Path error: " + output);
             }
 
         } catch (IOException e) {
@@ -43,21 +43,58 @@ public abstract class Midia extends Worker {
         } catch (ExecutionException e) {
         }
 
-        if(archive.getPath().endsWith(output)){
-            
+    }
+
+    public void concatenate(Archive archive1, Archive archive2) {
+
+    }
+
+    public void resize(Archive archive, String size) {
+
+    }
+
+    private String nameCheck(Archive archive, String type) {
+
+        String output = "";
+        String newName = "";
+
+        try {
+            ProcessBuilder command = new ProcessBuilder(
+                    tools.get(0),
+                    "-FileTypeExtension",
+                    "-s4",
+                    archive.getPath());
+
+            command.redirectErrorStream(true);
+            Process thread = command.start();
+            Process sla = thread.onExit().get();
+
+            BufferedReader reader = new BufferedReader(
+                    new InputStreamReader(thread.getInputStream()));
+
+            String text;
+            while ((text = reader.readLine()) != null) {
+                output += text;
+            }
+
+            if (sla.exitValue() != 0) {
+                throw new IllegalPathException("Path error: " + output);
+            }
+
+            if (archive.getPath().endsWith(output)) {
+                newName = archive.getPath().replace(output, type);
+            } else {
+                newName = archive.getPath().concat("." + type);
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+        } catch (ExecutionException e) {
         }
 
-    }
-
-    public void concatenate(Archive archive1, Archive archive2){
+        return newName;
 
     }
-
-    public void resize(Archive archive, String size){
-
-    }
-
-
-
 
 }

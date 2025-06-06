@@ -6,15 +6,12 @@ public class Main {
         try{
 
         Picture PictureWorker = new Picture();
-        Archive Doc1 = new Archive("/home/jao/Pictures/73.jpg");
+        Archive Doc1 = new Archive("/home/jao/Pictures/73");
 
         Doc1.setMetaData(PictureWorker.pickMetaData(Doc1));
         Doc1.setType(PictureWorker.pickType(Doc1));
-
-        System.out.println(Doc1.getMetaData());
-
-
-        PictureWorker.changeMetaData(Doc1, "comment", "Sexo1");
+        
+        PictureWorker.changeType(Doc1, "kk");
         
     } catch (IllegalPathException e){
         System.err.println( e.getMessage());
